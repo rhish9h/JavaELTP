@@ -1,0 +1,6 @@
+Pune=Maharashtra
+Mumbai=Maharashtra
+Kolhapur=Maharashtra
+Belgavi=Karnataka
+Bengaluru=Karnataka
+Chennai=Tamil Nadu
