@@ -83,9 +83,40 @@ public class LiveBookingSystem {
 		sc.nextLine();
 	}
 	
-	private static void bookShow() {
-		// TODO Auto-generated method stub
+	private static void bookShow() throws SQLException {
+		showAllBookings();
 		
+		System.out.println("Enter show id to make bookings : ");
+		int showId = sc.nextInt();
+		
+		String seatSql = "select totalseats, availableseats from shows where id = ?";
+		PreparedStatement prep = dbConn.prepareStatement(seatSql);
+		prep.setInt(1, showId);
+		ResultSet rs = prep.executeQuery();
+		
+		rs.next();
+		int totalSeats = rs.getInt(1);
+		int availableSeats = rs.getInt(2);
+		
+		if (availableSeats == 0) {
+			System.out.println("No seats available.");
+		} else {
+			System.out.println("For id - " + showId + " total seats = " + totalSeats + " availableSeats = " + availableSeats);
+			
+			System.out.println("Enter number of seats to book : ");
+			int toBook = sc.nextInt();
+			
+			String sql = "update shows set availableseats = ? where id = ?";
+			prep = dbConn.prepareStatement(sql);
+			prep.setInt(1, availableSeats - toBook);
+			prep.setInt(2, showId);
+			
+			int result = prep.executeUpdate();
+			
+			System.out.println("Show booking status : " + result);
+		}
+		
+		pressKeyToContinue();
 	}
 
 	private static void dispMoviesByShowsToday() throws SQLException {
@@ -185,14 +216,111 @@ public class LiveBookingSystem {
 		pressKeyToContinue();
 	}
 
-	private static void updateShow() {
-		// TODO Auto-generated method stub
+	private static void updateShow() throws SQLException {
+		showAllBookings();
 		
+		System.out.println("Enter show id to update :");
+		int showId = sc.nextInt();
+		
+		String sql = "select * from shows where id = ?";
+		PreparedStatement prep = dbConn.prepareStatement(sql);
+		prep.setInt(1, showId);
+		ResultSet rs = prep.executeQuery();
+		System.out.println("Show " + showId + " : \n");
+		
+		int id=0, movieId=0, totalSeats=0, availableSeats=0;
+		Date time = null;
+
+		while (rs.next()) {
+			id = rs.getInt(1);
+			System.out.print(" id = " + id);
+			
+			movieId = rs.getInt(2);
+			System.out.print(" movie id = " + movieId);
+			
+			time = rs.getDate(3);
+			System.out.print(" time = " + time);
+			
+			totalSeats = rs.getInt(4);
+			System.out.print(" total seats = " + totalSeats);
+			
+			availableSeats = rs.getInt(5);
+			System.out.print(" available seats = " + availableSeats);
+			
+			System.out.println();
+		}
+		
+		int option = -1;
+		
+		while (option != 0) {
+			System.out.println("\nEnter number to change following : ");
+			System.out.println("1. movie id");
+			System.out.println("2. time");
+			System.out.println("3. total seats");
+			System.out.println("4. available seats");
+			System.out.println("5. Cancel.");
+			System.out.println("0. Done.");
+			option = sc.nextInt();
+			
+			switch (option) {
+				case 1:
+					System.out.println("Enter movie id : ");
+					movieId = sc.nextInt();
+					break;
+				case 2:
+					System.out.println("Enter time in yyyy-mm-dd format eg. 2015-03-31 :");
+					sc.nextLine();
+					time = Date.valueOf(sc.nextLine());
+					break;
+				case 3:
+					System.out.println("Enter total seats : ");
+					totalSeats = sc.nextInt();
+					break;
+				case 4:
+					System.out.println("Enter available seats : ");
+					availableSeats = sc.nextInt();
+					break;
+				case 5:
+					System.out.println("Cancelling update.");
+					pressKeyToContinue();
+					return;
+				case 0:
+					break;	
+				default:
+					System.out.println("Invalid option.");
+					break;
+			}
+		}
+		
+		sql = "update shows set movie_id = ?, time = ?, totalseats = ?, availableseats = ? " +
+				"where id = ?";
+		prep = dbConn.prepareStatement(sql);
+		prep.setInt(1, movieId);
+		prep.setDate(2, time);
+		prep.setInt(3, totalSeats);
+		prep.setInt(4, availableSeats);
+		prep.setInt(5, showId);
+		
+		int res = prep.executeUpdate();
+		System.out.println("Rows updated : " + res);
+		
+		pressKeyToContinue();
 	}
 
-	private static void deleteShow() {
-		// TODO Auto-generated method stub
+	private static void deleteShow() throws SQLException {
+		showAllBookings();
 		
+		System.out.println("Enter show id to delete the show : ");
+		int showId = sc.nextInt();
+		
+		String sql = "delete from shows where id = ?";
+		PreparedStatement prep = dbConn.prepareStatement(sql);
+		prep.setInt(1, showId);
+		
+		int result = prep.executeUpdate();
+		System.out.println(result + " row deleted.");
+		
+		pressKeyToContinue();
 	}
 
 	private static void addNewShow() throws SQLException {
