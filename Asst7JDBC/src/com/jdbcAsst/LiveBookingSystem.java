@@ -1,10 +1,12 @@
 package com.jdbcAsst;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Random;
 import java.util.Scanner;
 
 public class LiveBookingSystem {
@@ -193,14 +195,61 @@ public class LiveBookingSystem {
 		
 	}
 
-	private static void addNewShow() {
-		// TODO Auto-generated method stub
+	private static void addNewShow() throws SQLException {
+		showAllMovies();
 		
+		System.out.println("Enter movie id to book show : ");
+		int movieId = sc.nextInt();
+		
+		System.out.println("Enter time of show in yyyy-mm-dd format eg. 2015-03-31: ");
+		sc.nextLine();
+		Date showTime = Date.valueOf(sc.nextLine());
+		
+		System.out.println("Enter total number of seats : ");
+		int totalSeats = sc.nextInt();
+		
+		Random random = new Random();
+		String sql = "insert into shows values (?, ?, ?, ?, ?)";
+		PreparedStatement prep = dbConn.prepareStatement(sql);
+		
+		prep.setInt(1, random.nextInt(10000));
+		prep.setInt(2, movieId);
+		prep.setDate(3, showTime);
+		prep.setInt(4, totalSeats);
+		prep.setInt(5,  totalSeats);
+		
+		int result = prep.executeUpdate();
+		System.out.println("Inserted " + result + " row/s succesfully.");
+		
+		pressKeyToContinue();
 	}
 
-	private static void addNewMovie() {
-		// TODO Auto-generated method stub
+	private static void addNewMovie() throws SQLException {
+		Random random = new Random();
+		int id = random.nextInt(10000);
+		String name, language;
+		Date releaseDate = null;
 		
+		String sql = "insert into movies values(?, ?, ?, ?)";
+		PreparedStatement prep = dbConn.prepareStatement(sql);
+		
+		System.out.println("Enter name of the movie : ");
+		sc.nextLine();
+		name = sc.nextLine();
+		System.out.println("Enter language of the movie : ");
+		language = sc.nextLine();
+		System.out.println("Enter release date in yyyy-mm-dd format eg. 2015-03-31 : ");
+		releaseDate = Date.valueOf(sc.nextLine());
+		
+		prep.setInt(1, id);
+		prep.setString(2, name);
+		prep.setString(3, language);
+		prep.setDate(4, releaseDate);
+		
+		int result = prep.executeUpdate();
+		System.out.println("Rows added : " + result);
+		
+		pressKeyToContinue();
 	}
 
 	public static void main(String[] args) {
