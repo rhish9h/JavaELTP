@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -285,6 +286,60 @@ public class Movies {
 		return movies;
 	}
 	
+	private List<Movie> convertResultSetToMovieList(ResultSet rs) {
+		List <Movie> movies = new ArrayList<> ();
+		
+		Integer movieId;
+		String movieName;
+		Category movieType;
+		Language language;
+		Date releaseDate;
+		List<String> casting;
+		Double rating;
+		Double totalBusinessDone;
+		
+		try {
+			while(rs.next()) {
+				movieId = rs.getInt(1);
+				movieName = rs.getString(2);
+				movieType = parseMovieType(rs.getString(3));
+				language = parseLanguage(rs.getString(4));
+				releaseDate = rs.getDate(5);
+				casting = parseCasting(rs.getString(6));
+				rating = rs.getDouble(7);
+				totalBusinessDone = rs.getDouble(8);
+				
+				Movie movie = new Movie(movieId, movieName, movieType, language, releaseDate, casting, rating, totalBusinessDone);
+				movies.add(movie);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return movies;
+	}
+	
+	List <Movie> getMoviesReleasedInYear(int year) {
+		List <Movie> movies = new ArrayList<>();
+		String sql = "select * from movieDetails where to_char(releaseDate, 'yyyy') = ?";
+		
+		try {
+			PreparedStatement prep = movieDetailsDbConn.prepareStatement(sql);
+			
+			prep.setInt(1, year);
+			ResultSet rs = prep.executeQuery();
+			
+			movies = convertResultSetToMovieList(rs);
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return movies;
+	}
+	
 	public static void main(String[] args) {
 		Movies myMoviesObj = new Movies();
 		File file = new File("movies.txt");
@@ -308,6 +363,11 @@ public class Movies {
 		myMoviesObj.displayHeading("Deserialize movie data from - " + serialFileName);
 		List <Movie> deserialMovies = myMoviesObj.deserializeMovies(serialFileName);
 		myMoviesObj.printMovieList(deserialMovies);
+		
+		int year = 2012;
+		myMoviesObj.displayHeading("Find movies released in entered year - " + year);
+		List <Movie> moviesByReleaseYear = myMoviesObj.getMoviesReleasedInYear(year);
+		myMoviesObj.printMovieList(moviesByReleaseYear);
 	}
 	
 }
