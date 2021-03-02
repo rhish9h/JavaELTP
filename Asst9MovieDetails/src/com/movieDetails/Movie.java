@@ -1,13 +1,15 @@
 package com.movieDetails;
 
+import java.io.Serializable;
 import java.sql.Date;
 import java.util.List;
 
 import com.movieDetails.MovieEnums.Category;
 import com.movieDetails.MovieEnums.Language;
 
-public class Movie {
+public class Movie implements Serializable {
 	
+	private static final long serialVersionUID = 6625316129290657856L;
 	private Integer movieId;
 	private String movieName;
 	private Category movieType;

@@ -2,8 +2,13 @@ package com.movieDetails;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -249,6 +254,37 @@ public class Movies {
 		addMovie(movie, movies);
 	}
 	
+	public void serializeMovies(List <Movie> movies, String fileName) {
+		File file = new File(fileName);
+		
+		try (FileOutputStream fos = new FileOutputStream(file);
+				ObjectOutputStream out = new ObjectOutputStream(fos)){
+			
+			out.writeObject(movies);
+			
+			System.out.println("Serialized movies list");
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public List<Movie> deserializeMovies(String fileName) {
+		File file = new File(fileName);
+		List<Movie> movies = new ArrayList<>();
+		
+		try(FileInputStream fis = new FileInputStream(file);
+				ObjectInputStream in = new ObjectInputStream(fis)) {
+			
+			movies = (ArrayList<Movie>) in.readObject();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return movies;
+	}
+	
 	public static void main(String[] args) {
 		Movies myMoviesObj = new Movies();
 		File file = new File("movies.txt");
@@ -264,6 +300,14 @@ public class Movies {
 		myMoviesObj.addDummyMovie(myMovies);
 		System.out.println();
 		myMoviesObj.printMovieList(myMovies);
+		
+		String serialFileName = "serialFileName";
+		myMoviesObj.displayHeading("Serialize movie data to - " + serialFileName);
+		myMoviesObj.serializeMovies(myMovies, serialFileName);
+		
+		myMoviesObj.displayHeading("Deserialize movie data from - " + serialFileName);
+		List <Movie> deserialMovies = myMoviesObj.deserializeMovies(serialFileName);
+		myMoviesObj.printMovieList(deserialMovies);
 	}
 	
 }
