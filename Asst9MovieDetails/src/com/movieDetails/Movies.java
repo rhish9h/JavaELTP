@@ -4,8 +4,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.movieDetails.MovieEnums.Category;
@@ -14,9 +18,17 @@ import com.movieDetails.exceptions.IncorrectValueCountException;
 import com.movieDetails.exceptions.InvalidLanguageException;
 import com.movieDetails.exceptions.InvalidMovieIdException;
 
+import oracle.sql.ARRAY;
+
 public class Movies {
 	
-	List<Movie> populateMovies(File file) {
+	Connection movieDetailsDbConn;
+	
+	public Movies() {
+		movieDetailsDbConn = DbConnection.getConnection();
+	}
+	
+	public List<Movie> populateMovies(File file) {
 		List <Movie> movieList = new ArrayList<>();
 		
 		try (FileReader fr = new FileReader(file);
@@ -67,6 +79,11 @@ public class Movies {
 		
 		return castList;
 	}
+	
+	private String deParseCasting(List <String> casting) {
+		String castStr = String.join(";", casting);
+		return castStr;
+	} 
 	
 	private Date parseDate(String strDate) {
 		int dateIdx = 0, monthIdx = 1, yearIdx = 2;
@@ -164,14 +181,89 @@ public class Movies {
 		System.out.println();
 	}
 	
+	public void displayHeading(String heading) {
+		System.out.println("\n***********************************************************");
+		System.out.println(heading);
+		System.out.println("***********************************************************\n");
+	}
+	
+	public boolean addAllMoviesInDb(List <Movie> movies) {
+		boolean successInAddingMovieInDb = true;
+		
+		String sql = "insert into movieDetails values (?,?,?,?,?,?,?,?)";
+		int rowsInserted = 0;
+		
+		try {
+			PreparedStatement prep = movieDetailsDbConn.prepareStatement(sql);
+			
+			for (Movie movie : movies) {
+				
+				try {
+					prep.setInt(1, movie.getMovieId());
+					prep.setString(2, movie.getMovieName());
+					prep.setString(3, movie.getMovieType().name());
+					prep.setString(4, movie.getLanguage().name());
+					prep.setDate(5, movie.getReleaseDate());
+					prep.setString(6, deParseCasting(movie.getCasting()));
+					prep.setDouble(7, movie.getRating());
+					prep.setDouble(8, movie.getTotalBusinessDone());
+					
+					rowsInserted += prep.executeUpdate();
+				} catch (Exception e) {
+					System.err.println(e.getMessage());
+				}	
+			}
+			
+			if (rowsInserted == 0) {
+				throw new SQLException("0 rows inserted.");
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			successInAddingMovieInDb = false;
+		}
+
+		System.out.println("Rows inserted in the database = " + rowsInserted);
+		return successInAddingMovieInDb;
+	}
+	
+	public void addMovie(Movie movie, List<Movie> movies) {
+		movies.add(movie);
+	}
+	
+	public void addDummyMovie(List<Movie> movies) {
+		Integer movieId = 10;
+		String movieName = "Sully";
+		Category movieType = Category.DRAMA;
+		Language language = Language.ENGLISH;
+		Date releaseDate = Date.valueOf("2016-09-09");
+		List<String> casting = new ArrayList<String>(Arrays.asList(new String[] {"Tom Hanks", "Laura Linney"}));
+		Double rating = 3.4;
+		Double totalBusinessDone = 240d;
+		
+		Movie movie = new Movie(movieId, movieName, movieType, language, releaseDate, casting, rating, totalBusinessDone);
+		
+		System.out.println("Adding movie - " + movie.getMovieName());
+		System.out.println(movie);
+		addMovie(movie, movies);
+	}
+	
 	public static void main(String[] args) {
 		Movies myMoviesObj = new Movies();
 		File file = new File("movies.txt");
 		List <Movie> myMovies = myMoviesObj.populateMovies(file);
 		
-		System.out.println("\nPopulated movies list from file - " + file.getName() + "\n");
+		myMoviesObj.displayHeading("Populate movies list from file - " + file.getName());
 		myMoviesObj.printMovieList(myMovies);
 		
+		myMoviesObj.displayHeading("Store all movies in db");
+		System.out.println(myMoviesObj.addAllMoviesInDb(myMovies));
+		
+		myMoviesObj.displayHeading("Add new movie in the list");
+		myMoviesObj.addDummyMovie(myMovies);
+		System.out.println();
+		myMoviesObj.printMovieList(myMovies);
 	}
 	
 }

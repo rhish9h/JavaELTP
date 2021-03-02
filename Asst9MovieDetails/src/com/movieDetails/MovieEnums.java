@@ -2,7 +2,7 @@ package com.movieDetails;
 
 public class MovieEnums {
 	enum Category {
-		THRILLER, ACTION, ROMANTIC, COMEDY, HORROR, DRAMA;
+		THRILLER, ACTION, ROMANCE, COMEDY, HORROR, DRAMA;
 	}
 
 	enum Language {
