@@ -340,6 +340,36 @@ public class Movies {
 		return movies;
 	}
 	
+	public List<Movie> getMoviesByActor(String ... actorNames) {
+		List <Movie> movies = new ArrayList<>();
+		int actorNameCount = actorNames.length;
+		
+		if (actorNameCount > 0) {
+			String sql = "select * from movieDetails where casting like ?";
+			
+			for (int i = 1; i < actorNameCount; i++) {
+				sql += " or casting like ?";
+			}
+			
+			try {
+				PreparedStatement prep = movieDetailsDbConn.prepareStatement(sql);
+				
+				for(int i = 0; i < actorNameCount; i++) {
+					prep.setString(i+1, "%" + actorNames[i] + "%");
+				}
+				
+				ResultSet rs = prep.executeQuery();
+				movies = convertResultSetToMovieList(rs);
+				
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		return movies;
+	}
+	
 	public static void main(String[] args) {
 		Movies myMoviesObj = new Movies();
 		File file = new File("movies.txt");
@@ -368,6 +398,11 @@ public class Movies {
 		myMoviesObj.displayHeading("Find movies released in entered year - " + year);
 		List <Movie> moviesByReleaseYear = myMoviesObj.getMoviesReleasedInYear(year);
 		myMoviesObj.printMovieList(moviesByReleaseYear);
+		
+		String [] actors = new String [] {"Amir", "Kareena", "Tom"};
+		myMoviesObj.displayHeading("List of movies by actors - " + String.join(" - ", actors));
+		List<Movie> moviesByActor = myMoviesObj.getMoviesByActor(actors);
+		myMoviesObj.printMovieList(moviesByActor);
 	}
 	
 }
