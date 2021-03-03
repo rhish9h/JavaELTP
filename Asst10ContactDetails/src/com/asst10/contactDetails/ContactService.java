@@ -105,6 +105,15 @@ public class ContactService {
 		return matchedContacts;
 	}
 	
+	public void addContactNumber(int keyContactId, String newContactNumber, List<Contact> contacts) {
+		for (Contact contact : contacts) {
+			if (contact.getContactId() == keyContactId) {
+				contact.getContactNumber().add(newContactNumber);
+				break;
+			}
+		}
+	}
+	
 	public static void main(String[] args) {
 		ContactService cs = new ContactService();
 		List <Contact> contacts = new ArrayList<>();
@@ -182,6 +191,15 @@ public class ContactService {
 			e.printStackTrace();
 		}
 		cs.displayContactList(matchedContacts);
+		
+		// Add contact number
+		int keyContactId = toBeSearchedLater.getContactId();
+		String newContactNumber = cs.getRandomPhoneNumber();
+		cs.displayHeading("Add contact number - " + newContactNumber + " to contact with id - " + keyContactId);
+		cs.addContactNumber(keyContactId, newContactNumber, contacts);
+		cs.displayContactList(contacts);
 	}
+
+	
 
 }
