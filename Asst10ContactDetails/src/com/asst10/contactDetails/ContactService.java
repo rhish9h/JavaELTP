@@ -1,6 +1,7 @@
 package com.asst10.contactDetails;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -24,7 +25,7 @@ public class ContactService {
 	}
 	
 	public String getRandomPhoneNumber() {
-		return String.valueOf(Math.random() * ((9999999999l - 1000000000l) + 1) + 1000000000); 
+		return String.valueOf((long)(Math.random() * 9999999999l) + 1000000000l); 
 	}
 	
 	public Contact getDummyContact() {
@@ -53,14 +54,55 @@ public class ContactService {
 		return dummyContact;
 	}
 	
+	public void removeContact(Contact contact, List<Contact> contacts) throws ContactNotFoundException {
+		Iterator<Contact> iter = contacts.iterator();
+		boolean found = false;
+		
+		while(iter.hasNext()) {
+			if (iter.next().equals(contact)) {
+				iter.remove();
+				found = true;
+			}
+		}
+		
+		if (! found) {
+			throw new ContactNotFoundException(contact);
+		}
+	}
+	
 	public static void main(String[] args) {
 		ContactService cs = new ContactService();
 		List <Contact> contacts = new ArrayList<>();
 		
+		// Add contact in contacts
 		cs.displayHeading("Add contact in contacts");
 		cs.addContact(cs.getDummyContact(), contacts);
+		cs.addContact(cs.getDummyContact(), contacts);
+		cs.addContact(cs.getDummyContact(), contacts);
+		
+		Contact toRemoveLater = cs.getDummyContact();
+		cs.addContact(toRemoveLater, contacts);
 		cs.displayContactList(contacts);
 
+		// Remove contact from contacts - contact exists
+		cs.displayHeading("Remove contact from contacts - " + toRemoveLater.getContactName() + " contact exists");
+		try {
+			cs.removeContact(toRemoveLater, contacts);
+		} catch (ContactNotFoundException e) {
+			e.printStackTrace();
+		}
+		cs.displayContactList(contacts);
+		
+		// Remove contact from contacts - contact doesn't exists	
+		Contact nonExistentContact = cs.getDummyContact();
+		cs.displayHeading("Remove contact from contacts - " + nonExistentContact.getContactName() + " contact doesn't exists");
+		try {
+			cs.removeContact(nonExistentContact, contacts);
+		} catch (ContactNotFoundException e) {
+			e.printStackTrace();
+		}
+		cs.displayContactList(contacts);
+		
 	}
 
 }
