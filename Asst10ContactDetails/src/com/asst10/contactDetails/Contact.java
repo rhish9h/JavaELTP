@@ -2,7 +2,7 @@ package com.asst10.contactDetails;
 
 import java.util.List;
 
-public class Contact {
+public class Contact implements Comparable<Contact> {
 	
 	int contactId;
 	String contactName;
@@ -92,5 +92,10 @@ public class Contact {
 	
 	public void setContactNumber(List<String> contactNumber) {
 		this.contactNumber = contactNumber;
+	}
+
+	@Override
+	public int compareTo(Contact o) {
+		return contactName.compareTo(o.getContactName());
 	}
 }

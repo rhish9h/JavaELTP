@@ -1,6 +1,8 @@
 package com.asst10.contactDetails;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -114,6 +116,11 @@ public class ContactService {
 		}
 	}
 	
+	private void sortContactsByName(List<Contact> contacts) {
+		Collections.sort(contacts);
+		
+	}
+	
 	public static void main(String[] args) {
 		ContactService cs = new ContactService();
 		List <Contact> contacts = new ArrayList<>();
@@ -198,7 +205,15 @@ public class ContactService {
 		cs.displayHeading("Add contact number - " + newContactNumber + " to contact with id - " + keyContactId);
 		cs.addContactNumber(keyContactId, newContactNumber, contacts);
 		cs.displayContactList(contacts);
+		
+		// Sort contacts by name
+		cs.displayHeading("Sort contacts by name");
+		cs.sortContactsByName(contacts);
+		cs.displayContactList(contacts);
+		
 	}
+
+	
 
 	
 
