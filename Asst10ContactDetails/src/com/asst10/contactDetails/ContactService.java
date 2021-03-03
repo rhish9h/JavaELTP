@@ -9,19 +9,39 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public class ContactService {
 
+	private Connection dbConn;
+	
+	public ContactService() {
+		dbConn = DbConnection.getConnection();
+	}
+	
 	public void addContact(Contact contact, List<Contact> contacts) {
 		contacts.add(contact);
 	}
 	
 	public void displayContactList(List<Contact> contacts) {
+		for (Contact contact : contacts) {
+			System.out.println(contact);
+		}
+		System.out.println();
+	}
+	
+	public void displayContactSet(Set<Contact> contacts) {
 		for (Contact contact : contacts) {
 			System.out.println(contact);
 		}
@@ -184,6 +204,42 @@ public class ContactService {
 		return contacts;
 	}
 	
+	public Set<Contact> populateContactFromDb() throws SQLException {
+		Set <Contact> contacts = new HashSet<Contact>();
+		
+		String sql = "select * from contact_tbl";
+		Statement stmt = dbConn.createStatement();
+		
+		ResultSet rs = stmt.executeQuery(sql);
+		
+		int contactId;
+		String contactName;
+		String emailAddress;
+		List<String> contactNumber;
+		
+		try {
+			while (rs.next()) {
+				contactId = rs.getInt(1);
+				contactName = rs.getString(2);
+				emailAddress = rs.getString(3);
+				String contactStr = rs.getString(4);
+				
+				if (contactStr != null) {
+					contactNumber = new ArrayList(Arrays.asList(contactStr.split(",")));
+				} else {
+					contactNumber = new ArrayList<>();
+				}
+				Contact curContact = new Contact(contactId, contactName, emailAddress, contactNumber);
+				
+				contacts.add(curContact);
+			}
+		} catch (SQLException | NullPointerException e) {
+			e.printStackTrace();
+		}
+		
+		return contacts;
+	}
+	
 	public static void main(String[] args) {
 		ContactService cs = new ContactService();
 		List <Contact> contacts = new ArrayList<>();
@@ -290,6 +346,18 @@ public class ContactService {
 		List<Contact> deserializedContacts = cs.deserializeContact(fileName);
 		cs.displayContactList(deserializedContacts);
 		
+		// Populate contact from db
+		cs.displayHeading("Populate contact from db");
+		Set<Contact> fromDb = null;
+		try {
+			fromDb = cs.populateContactFromDb();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		cs.displayContactSet(fromDb);
+		
 	}
+
+	
 
 }
