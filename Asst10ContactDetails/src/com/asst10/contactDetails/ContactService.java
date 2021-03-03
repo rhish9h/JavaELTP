@@ -2,10 +2,12 @@ package com.asst10.contactDetails;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -167,6 +169,21 @@ public class ContactService {
 		}
 	}
 	
+	public List<Contact> deserializeContact(String fileName) {
+		File file = new File(fileName);
+		List <Contact> contacts = new ArrayList<>();
+		
+		try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+			
+			contacts = (ArrayList<Contact>) in.readObject();
+			
+		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		return contacts;
+	}
+	
 	public static void main(String[] args) {
 		ContactService cs = new ContactService();
 		List <Contact> contacts = new ArrayList<>();
@@ -268,7 +285,10 @@ public class ContactService {
 		cs.displayHeading("Serialize contact details in file - " + fileName);
 		cs.serializeContactDetails(contacts, fileName);
 		
-		
+		// Deserialize contact details 
+		cs.displayHeading("Deserialize contact details from file - " + fileName);
+		List<Contact> deserializedContacts = cs.deserializeContact(fileName);
+		cs.displayContactList(deserializedContacts);
 		
 	}
 
