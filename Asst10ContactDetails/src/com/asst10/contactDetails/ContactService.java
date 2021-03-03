@@ -1,5 +1,9 @@
 package com.asst10.contactDetails;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -116,9 +120,39 @@ public class ContactService {
 		}
 	}
 	
-	private void sortContactsByName(List<Contact> contacts) {
+	public void sortContactsByName(List<Contact> contacts) {
 		Collections.sort(contacts);
 		
+	}
+	
+	public void readContactsFromFile(List<Contact> contacts, String fileName) {
+		File file = new File(fileName);
+		
+		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+			String line = null;
+			int contactId;
+			String contactName;
+			String emailAddress;
+			List<String> contactNumber;
+			
+			while ((line = br.readLine()) != null) {
+				String [] tokens = line.split(",");
+				
+				contactId = Integer.parseInt(tokens[0]);
+				contactName = tokens[1];
+				emailAddress = tokens[2];
+				contactNumber = new ArrayList<String>();
+				
+				for (int i = 3; i < tokens.length; i++) {
+					contactNumber.add(tokens[i]);
+				}
+				
+				contacts.add(new Contact(contactId, contactName, emailAddress, contactNumber));
+			}
+			
+		} catch (IOException | NullPointerException ioe) {
+			ioe.printStackTrace();
+		}
 	}
 	
 	public static void main(String[] args) {
@@ -211,10 +245,12 @@ public class ContactService {
 		cs.sortContactsByName(contacts);
 		cs.displayContactList(contacts);
 		
+		// Read contacts from file
+		String fileName = "Contact.txt";
+		cs.displayHeading("Read contacts from file - " + fileName);
+		cs.readContactsFromFile(contacts, fileName);
+		cs.displayContactList(contacts);
+		
 	}
-
-	
-
-	
 
 }
