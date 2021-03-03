@@ -16,7 +16,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.movieDetails.MovieEnums.Category;
 import com.movieDetails.MovieEnums.Language;
@@ -114,7 +120,7 @@ public class Movies {
 		Language languageToReturn = null;
 		
 		for (Language lang : Language.values()) {
-			if (lang.getLanguage().equals(language)) {
+			if (lang.getLanguage().equals(language) || lang.name().equals(language)) {
 				languageToReturn = lang;
 			}
 		}
@@ -235,10 +241,13 @@ public class Movies {
 	}
 	
 	public void addMovie(Movie movie, List<Movie> movies) {
+		System.out.println("Adding movie - " + movie.getMovieName());
+		System.out.println(movie);
+		
 		movies.add(movie);
 	}
 	
-	public void addDummyMovie(List<Movie> movies) {
+	public Movie getDummyMovie() {
 		Integer movieId = 10;
 		String movieName = "Sully";
 		Category movieType = Category.DRAMA;
@@ -250,9 +259,8 @@ public class Movies {
 		
 		Movie movie = new Movie(movieId, movieName, movieType, language, releaseDate, casting, rating, totalBusinessDone);
 		
-		System.out.println("Adding movie - " + movie.getMovieName());
-		System.out.println(movie);
-		addMovie(movie, movies);
+		
+		return movie;
 	}
 	
 	public void serializeMovies(List <Movie> movies, String fileName) {
@@ -370,6 +378,63 @@ public class Movies {
 		return movies;
 	}
 	
+	public void updateRatings(Movie movie, double rating, List<Movie> movies) {
+		for(Movie curMovie : movies) {
+			if (movie.equals(curMovie)) {
+				curMovie.setRating(rating);
+			}
+		}
+	}
+	
+	public void updateBusiness(Movie movie, double amount, List<Movie> movies) {
+		for (Movie curMovie : movies) {
+			if (movie.equals(curMovie)) {
+				curMovie.setTotalBusinessDone(amount);
+			}
+		}
+	}
+	
+	public Map<Language, LinkedHashSet<Movie>> businessDone (double amount) {
+		Map <Language, LinkedHashSet<Movie>> langToMovie = new LinkedHashMap<> ();
+		
+		String sql = "select * from movieDetails where totalbusinessdone > ? order by totalbusinessdone desc";
+		try {
+			PreparedStatement prep = movieDetailsDbConn.prepareStatement(sql);
+			prep.setDouble(1, amount);
+			ResultSet rs = prep.executeQuery();
+			
+			List<Movie> movies = convertResultSetToMovieList(rs);
+			
+			for (Movie movie : movies) {
+				Language curLang = movie.getLanguage();
+				
+				if (langToMovie.containsKey(curLang)) {
+					langToMovie.get(curLang).add(movie);
+				} else {
+					LinkedHashSet<Movie> curSet = new LinkedHashSet<>();
+					curSet.add(movie);
+					langToMovie.put(movie.getLanguage(), curSet);
+				}
+				
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return langToMovie;
+	}
+	
+	public void displayLangToMovieMap(Map<Language, LinkedHashSet<Movie>> langToMovie) {
+		for (Language lang : langToMovie.keySet()) {
+			System.out.println(lang + " = ");
+			for (Movie movie : langToMovie.get(lang)) {
+				System.out.println(movie);
+			}
+			System.out.println("-");
+		}
+	}
+	
 	public static void main(String[] args) {
 		Movies myMoviesObj = new Movies();
 		File file = new File("movies.txt");
@@ -382,7 +447,8 @@ public class Movies {
 		System.out.println(myMoviesObj.addAllMoviesInDb(myMovies));
 		
 		myMoviesObj.displayHeading("Add new movie in the list");
-		myMoviesObj.addDummyMovie(myMovies);
+		Movie dummyMovie = myMoviesObj.getDummyMovie();
+		myMoviesObj.addMovie(dummyMovie, myMovies);
 		System.out.println();
 		myMoviesObj.printMovieList(myMovies);
 		
@@ -403,6 +469,21 @@ public class Movies {
 		myMoviesObj.displayHeading("List of movies by actors - " + String.join(" - ", actors));
 		List<Movie> moviesByActor = myMoviesObj.getMoviesByActor(actors);
 		myMoviesObj.printMovieList(moviesByActor);
+		
+		Double updatedRating = 4.4;
+		myMoviesObj.displayHeading("Update rating of " + dummyMovie.getMovieName() + " to " + updatedRating);
+		myMoviesObj.updateRatings(dummyMovie, updatedRating, myMovies);
+		myMoviesObj.printMovieList(myMovies);
+		
+		Double updatedBusiness = 245.3;
+		myMoviesObj.displayHeading("Updating total business done of " + dummyMovie.getMovieName() + " to " + updatedBusiness);
+		myMoviesObj.updateBusiness(dummyMovie, updatedBusiness, myMovies);
+		myMoviesObj.printMovieList(myMovies);
+		
+		Double businessThreshold = 24d;
+		myMoviesObj.displayHeading("Display movies by language where business done is greater than - " + businessThreshold);
+		Map<Language, LinkedHashSet<Movie>> langToMovie = myMoviesObj.businessDone(businessThreshold);
+		myMoviesObj.displayLangToMovieMap(langToMovie);
 	}
 	
 }
