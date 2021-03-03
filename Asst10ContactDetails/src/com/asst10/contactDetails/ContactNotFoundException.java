@@ -4,6 +4,10 @@ public class ContactNotFoundException extends Exception {
 	private static final long serialVersionUID = 1L;
 
 	ContactNotFoundException(Contact contact) {
-		System.err.println("Contact " + contact.getContactId() + " not found - " + contact);
+		System.err.println("Contact " + contact.getContactName() + " not found - " + contact);
+	}
+
+	public ContactNotFoundException(String name) {
+		System.err.println("Contact " + name + " not found");
 	}
 }

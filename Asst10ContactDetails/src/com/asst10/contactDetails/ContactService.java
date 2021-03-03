@@ -70,6 +70,23 @@ public class ContactService {
 		}
 	}
 	
+	public Contact searchContactByName(String name, List<Contact> contacts) throws ContactNotFoundException {
+		Contact contact = null;
+		
+		for (Contact curContact : contacts) {
+			if (curContact.getContactName().equals(name)) {
+				contact = curContact;
+				break;
+			}
+		}
+		
+		if (contact == null) {
+			throw new ContactNotFoundException(name);
+		}
+		
+		return contact;
+	}
+	
 	public static void main(String[] args) {
 		ContactService cs = new ContactService();
 		List <Contact> contacts = new ArrayList<>();
@@ -78,7 +95,9 @@ public class ContactService {
 		cs.displayHeading("Add contact in contacts");
 		cs.addContact(cs.getDummyContact(), contacts);
 		cs.addContact(cs.getDummyContact(), contacts);
-		cs.addContact(cs.getDummyContact(), contacts);
+		
+		Contact toBeSearchedLater = cs.getDummyContact();
+		cs.addContact(toBeSearchedLater, contacts);
 		
 		Contact toRemoveLater = cs.getDummyContact();
 		cs.addContact(toRemoveLater, contacts);
@@ -103,6 +122,24 @@ public class ContactService {
 		}
 		cs.displayContactList(contacts);
 		
+		// Search contact in contacts - contact exists
+		cs.displayHeading("Search contact in contacts - " + toBeSearchedLater.getContactName() + " - contact exists");
+		try {
+			cs.searchContactByName(toBeSearchedLater.getContactName(), contacts);
+		} catch (ContactNotFoundException e) {
+			e.printStackTrace();
+		}
+		cs.displayContactList(contacts);
+		
+		// Search contact in contacts - contact doesn't exist
+		String nameNotExists = "randomName";
+		cs.displayHeading("Search contact in contacts - " + nameNotExists + " - contact doesn't exist");
+		try {
+			cs.searchContactByName(nameNotExists, contacts);
+		} catch (ContactNotFoundException e) {
+			e.printStackTrace();
+		}
+		cs.displayContactList(contacts);
 	}
 
 }
