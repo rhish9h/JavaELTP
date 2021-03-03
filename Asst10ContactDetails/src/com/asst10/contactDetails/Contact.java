@@ -1,9 +1,11 @@
 package com.asst10.contactDetails;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Contact implements Comparable<Contact> {
+public class Contact implements Comparable<Contact>, Serializable {
 	
+	private static final long serialVersionUID = -759484599084588113L;
 	int contactId;
 	String contactName;
 	String emailAddress;
