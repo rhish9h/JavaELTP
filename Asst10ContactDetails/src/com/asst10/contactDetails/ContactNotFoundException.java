@@ -10,4 +10,8 @@ public class ContactNotFoundException extends Exception {
 	public ContactNotFoundException(String name) {
 		System.err.println("Contact " + name + " not found");
 	}
+
+	public ContactNotFoundException(String number, int i) {
+		System.err.println("Contact with number " + number + " not found");
+	}
 }

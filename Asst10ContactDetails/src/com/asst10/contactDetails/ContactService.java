@@ -43,7 +43,7 @@ public class ContactService {
 		contactName = names[random.nextInt(names.length)];
 		emailAddress = emails[random.nextInt(emails.length)];
 		contactNumber = new ArrayList<String>();
-		int numOfContacts = random.nextInt(4);
+		int numOfContacts = random.nextInt(4) + 1;
 		for (int i = 0; i < numOfContacts; i++) {
 			contactNumber.add(getRandomPhoneNumber());
 		}
@@ -85,6 +85,24 @@ public class ContactService {
 		}
 		
 		return contact;
+	}
+	
+	public List<Contact> searchContactByNumber(String number, List<Contact> contacts) throws ContactNotFoundException {
+		List <Contact> matchedContacts = new ArrayList<>();
+		
+		for (Contact contact : contacts) {
+			for (String curNumber : contact.getContactNumber()) {
+				if (curNumber.contains(number)) {
+					matchedContacts.add(contact);
+					break;
+				}
+			}
+		}
+		
+		if (matchedContacts.isEmpty()) {
+			throw new ContactNotFoundException(number, 1);
+		}
+		return matchedContacts;
 	}
 	
 	public static void main(String[] args) {
@@ -140,6 +158,30 @@ public class ContactService {
 			e.printStackTrace();
 		}
 		cs.displayContactList(contacts);
+		
+		// Search contact by number - number exists
+		Random random = new Random();
+		String numberExists = toBeSearchedLater.getContactNumber().get(0);
+		numberExists = numberExists.substring(random.nextInt(numberExists.length()));
+		cs.displayHeading("Search contact by number " + numberExists + " - number exists");
+		List<Contact> matchedContacts = new ArrayList<>();
+		try {
+			matchedContacts = cs.searchContactByNumber(numberExists, contacts);
+		} catch (ContactNotFoundException e) {
+			e.printStackTrace();
+		}
+		cs.displayContactList(matchedContacts);
+		
+		// Search contact by number - number doesn;t exists
+		String numberNotExists = "-1";
+		cs.displayHeading("Search contact by number " + numberNotExists + " - number doesn't exist");
+		matchedContacts = new ArrayList<>();
+		try {
+			matchedContacts = cs.searchContactByNumber(numberNotExists, contacts);
+		} catch (ContactNotFoundException e) {
+			e.printStackTrace();
+		}
+		cs.displayContactList(matchedContacts);
 	}
 
 }
