@@ -1,11 +1,11 @@
 package com.movieDetails;
 
 public class MovieEnums {
-	enum Category {
+	public enum Category {
 		THRILLER, ACTION, ROMANCE, COMEDY, HORROR, DRAMA;
 	}
 
-	enum Language {
+	public enum Language {
 		ENGLISH("English"), 
 		HINDI("Hindi"), 
 		MARATHI("Marathi");

@@ -5,6 +5,6 @@ create table movieDetails (
     language varchar2(50),
     releaseDate date,
     casting varchar2(500),
-    rating number(4),
-    totalBusinessDone number(20)
+    rating number(4,3),
+    totalBusinessDone number(20,3)
 );
