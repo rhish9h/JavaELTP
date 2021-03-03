@@ -240,6 +240,12 @@ public class ContactService {
 		return contacts;
 	}
 	
+	public void addContacts(List<Contact> contacts, Set<Contact> fromDb) {
+		for (Contact contact : fromDb) {
+			contacts.add(contact);
+		}
+	}
+	
 	public static void main(String[] args) {
 		ContactService cs = new ContactService();
 		List <Contact> contacts = new ArrayList<>();
@@ -355,9 +361,11 @@ public class ContactService {
 			e.printStackTrace();
 		}
 		cs.displayContactSet(fromDb);
+	
+		// Add new contacts to the existing contacts
+		cs.displayHeading("Add new contacts to the existing contacts");
+		cs.addContacts(contacts, fromDb);
+		cs.displayContactList(contacts);
 		
 	}
-
-	
-
 }
